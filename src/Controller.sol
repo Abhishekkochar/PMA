@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Custom error
@@ -11,6 +12,7 @@ contract Controller {
         _;
     }
     // event
+
     event PROPERTY_ADDED(address property);
     event PROPERTY_REMOVED(address property);
 

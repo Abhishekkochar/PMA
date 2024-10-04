@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Property} from "./Property.sol";
@@ -23,27 +24,18 @@ contract DPMAFactory is Ownable {
      * @param _owner Owner of the property
      * @param _name Name of the property
      */
-    function deployProperty(
-        uint256 initBalance,
-        address _owner,
-        string memory _name
-    ) external onlyOwner returns (address) {
+    function deployProperty(uint256 initBalance, address _owner, string memory _name)
+        external
+        onlyOwner
+        returns (address)
+    {
         if (address(controller) == address(0)) revert INIT_CONTROLLER();
         address supportedTokenAddress = controller.getSupportedToken();
         if (initBalance == 0) revert INVALID_AMOUNT();
         IERC20 supportedToken = IERC20(supportedTokenAddress);
-        Property property = new Property(
-            _owner,
-            _name,
-            supportedToken,
-            controller
-        );
+        Property property = new Property(_owner, _name, supportedToken, controller);
         controller.addPropertySet(address(property));
-        bool success = supportedToken.transferFrom(
-            address(this),
-            address(property),
-            initBalance
-        );
+        bool success = supportedToken.transferFrom(address(this), address(property), initBalance);
         if (!success) revert TRANSFER_FAILED();
         return address(property);
     }
@@ -65,11 +57,7 @@ contract DPMAFactory is Ownable {
     function withdrawERC20(address _erc20, uint256 _amount) external onlyOwner {
         if (_erc20 == address(0)) revert INVALID_ADDRESS();
         if (_amount == 0) revert INVALID_AMOUNT();
-        bool success = IERC20(_erc20).transferFrom(
-            address(this),
-            owner(),
-            _amount
-        );
+        bool success = IERC20(_erc20).transferFrom(address(this), owner(), _amount);
         if (!success) revert TRANSFER_FAILED();
     }
 }

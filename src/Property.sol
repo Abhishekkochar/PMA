@@ -37,21 +37,18 @@ contract Property {
     IController controller;
     // property name
     string name;
+
     struct feeStatus {
         bool isActive;
         bool isPaid;
         uint256 feeAmount;
     }
+
     IERC20 supportedToken;
     // member => month => feeStatus
     mapping(address => mapping(uint8 => feeStatus)) internal activeMember;
 
-    constructor(
-        address _owner,
-        string memory _name,
-        IERC20 _supportedToken,
-        IController _controller
-    ) {
+    constructor(address _owner, string memory _name, IERC20 _supportedToken, IController _controller) {
         owner = _owner;
         name = _name;
         supportedToken = _supportedToken;
@@ -63,10 +60,12 @@ contract Property {
      * @param _currMonth Month the member paying the fee of
      */
     function payFee(uint8 _currMonth) external isPropertyActive {
-        if (!activeMember[msg.sender][_currMonth].isActive)
+        if (!activeMember[msg.sender][_currMonth].isActive) {
             revert MEMBER_IS_NOT_ACTIVE();
-        if (activeMember[msg.sender][_currMonth].isPaid)
+        }
+        if (activeMember[msg.sender][_currMonth].isPaid) {
             revert MEMBER_ALREADY_PAID();
+        }
         uint256 feeAmount = activeMember[msg.sender][_currMonth].feeAmount;
         supportedToken.transferFrom(msg.sender, address(this), feeAmount);
         emit FEE_PAID(msg.sender, _currMonth, feeAmount);
@@ -77,10 +76,7 @@ contract Property {
      * @param _to Address recieving supported token
      * @param _amount Amount paid `_to`
      */
-    function payExpenses(
-        address _to,
-        uint256 _amount
-    ) external onlyOwner isPropertyActive {
+    function payExpenses(address _to, uint256 _amount) external onlyOwner isPropertyActive {
         if (_to == address(0)) revert INVALID_ADDRESS();
         if (_amount == 0) revert INVALID_AMOUNT();
         uint256 beforeBalance = getBalance();
@@ -95,14 +91,15 @@ contract Property {
      * @param _currMonth Current month such as 1 for Jan
      * @param _feeAmount Maintaince fee this member has to pay
      */
-    function addMembers(
-        address[] calldata _members,
-        uint8 _currMonth,
-        uint256 _feeAmount
-    ) external onlyOwner isPropertyActive {
+    function addMembers(address[] calldata _members, uint8 _currMonth, uint256 _feeAmount)
+        external
+        onlyOwner
+        isPropertyActive
+    {
         if (_members.length == 0) revert INVALID_MEMBERS();
-        if (activeMember[msg.sender][_currMonth].isActive)
+        if (activeMember[msg.sender][_currMonth].isActive) {
             revert MEMBER_IS_ALREADY_ACTIVE();
+        }
         for (uint256 i = 0; i < _members.length; ++i) {
             if (_members[i] != address(0)) {
                 activeMember[_members[i]][_currMonth].isActive = true;
@@ -120,11 +117,7 @@ contract Property {
     function withdrawERC20(address _erc20, uint256 _amount) external onlyOwner {
         if (_erc20 == address(0)) revert INVALID_ADDRESS();
         if (_amount == 0) revert INVALID_AMOUNT();
-        bool success = IERC20(_erc20).transferFrom(
-            address(this),
-            owner,
-            _amount
-        );
+        bool success = IERC20(_erc20).transferFrom(address(this), owner, _amount);
         if (success == false) revert TRANSFER_FAILED();
     }
 
