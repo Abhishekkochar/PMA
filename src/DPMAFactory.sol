@@ -14,7 +14,7 @@ error INIT_CONTROLLER();
 error INSUFFICENT_BALANCE();
 
 contract DPMAFactory is Ownable {
-    IController controller;
+    IController public controller;
 
     constructor() Ownable(msg.sender) {}
 
@@ -35,7 +35,7 @@ contract DPMAFactory is Ownable {
         IERC20 supportedToken = IERC20(supportedTokenAddress);
         Property property = new Property(_owner, _name, supportedToken, controller);
         controller.addPropertySet(address(property));
-        bool success = supportedToken.transferFrom(address(this), address(property), initBalance);
+        bool success = supportedToken.transfer(address(property), initBalance);
         if (!success) revert TRANSFER_FAILED();
         return address(property);
     }
@@ -45,7 +45,7 @@ contract DPMAFactory is Ownable {
      * @param _controller Contoller address
      */
     function addController(IController _controller) external onlyOwner {
-        if (address(controller) == address(0)) revert INVALID_ADDRESS();
+        if (address(_controller) == address(0)) revert INVALID_ADDRESS();
         controller = _controller;
     }
 
@@ -57,7 +57,7 @@ contract DPMAFactory is Ownable {
     function withdrawERC20(address _erc20, uint256 _amount) external onlyOwner {
         if (_erc20 == address(0)) revert INVALID_ADDRESS();
         if (_amount == 0) revert INVALID_AMOUNT();
-        bool success = IERC20(_erc20).transferFrom(address(this), owner(), _amount);
+        bool success = IERC20(_erc20).transfer(owner(), _amount);
         if (!success) revert TRANSFER_FAILED();
     }
 }
