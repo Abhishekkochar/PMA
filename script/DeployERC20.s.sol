@@ -12,11 +12,7 @@ contract DeployERC20 is Script {
     function run() public returns (StandardTokenMock) {
         uint256 deployerPrivateKey = vm.envUint("MANAGER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-        StandardTokenMock erc20 = new StandardTokenMock(
-            factory,
-            _name,
-            _symbol
-        );
+        StandardTokenMock erc20 = new StandardTokenMock(factory, _name, _symbol);
         vm.stopBroadcast();
         console.log("erc20 address: %s", address(erc20));
         return erc20;

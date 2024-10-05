@@ -22,16 +22,9 @@ contract FactoryTest is Test {
         factory = new DPMAFactory();
         owner = factory.owner();
         // Deploying ERC20
-        standardTokenMock = new StandardTokenMock(
-            address(factory),
-            "Test Token",
-            "TT"
-        );
+        standardTokenMock = new StandardTokenMock(address(factory), "Test Token", "TT");
         // Deploying Controller
-        controller = new Controller(
-            address(factory),
-            address(standardTokenMock)
-        );
+        controller = new Controller(address(factory), address(standardTokenMock));
         vm.startPrank(owner);
         factory.addController(IController(address(controller)));
         vm.stopPrank();
@@ -45,11 +38,7 @@ contract FactoryTest is Test {
 
     function testDeployProperty() external returns (address) {
         vm.startPrank(owner);
-        address propAddress = factory.deployProperty(
-            100 ** 18,
-            propOwner,
-            "Property One"
-        );
+        address propAddress = factory.deployProperty(100 ** 18, propOwner, "Property One");
         vm.stopPrank();
         return propAddress;
     }
