@@ -5,10 +5,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {Controller} from "../src/Controller.sol";
 
 contract DeployController is Script {
-    function run(
-        address factory,
-        address supportedToken
-    ) public returns (Controller) {
+    function run(address factory, address supportedToken) public returns (Controller) {
         vm.startBroadcast();
         Controller controller = new Controller(factory, supportedToken);
         vm.stopBroadcast();
