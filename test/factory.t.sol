@@ -19,15 +19,12 @@ contract FactoryTest is Test {
 
     function setUp() public {
         // Deploying factory
-        DeployFactory deployFactory = new DeployFactory();
-        factory = deployFactory.run();
+        factory = new DPMAFactory();
         owner = factory.owner();
         // Deploying ERC20
-        DeployERC20 deployERC20 = new DeployERC20();
-        standardTokenMock = deployERC20.run(address(factory), "Test Token", "TT");
+        standardTokenMock = new StandardTokenMock(address(factory), "Test Token", "TT");
         // Deploying Controller
-        DeployController deployController = new DeployController();
-        controller = deployController.run(address(factory), address(standardTokenMock));
+        controller = new Controller(address(factory), address(standardTokenMock));
         vm.startPrank(owner);
         factory.addController(IController(address(controller)));
         vm.stopPrank();

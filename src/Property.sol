@@ -37,11 +37,15 @@ contract Property {
     IController controller;
     // property name
     string name;
+    uint256 public totaFeePaid;
+    uint256 public totalExpenses;
 
     struct feeStatus {
         bool isActive;
         bool isPaid;
         uint256 feeAmount;
+        uint256 totalPaid;
+        uint256 memberSince;
     }
 
     IERC20 supportedToken;
@@ -68,6 +72,8 @@ contract Property {
         }
         uint256 feeAmount = activeMember[msg.sender][_currMonth].feeAmount;
         supportedToken.transferFrom(msg.sender, address(this), feeAmount);
+        activeMember[msg.sender][_currMonth].totalPaid += feeAmount;
+        totaFeePaid = totaFeePaid + feeAmount;
         emit FEE_PAID(msg.sender, _currMonth, feeAmount);
     }
 
@@ -81,6 +87,7 @@ contract Property {
         if (_amount == 0) revert INVALID_AMOUNT();
         uint256 beforeBalance = getBalance();
         if (beforeBalance < _amount) revert INSUFFICENT_BALANCE();
+        totalExpenses = totalExpenses + _amount;
         supportedToken.transferFrom(address(this), _to, _amount);
         emit PAID_EXPENSES(msg.sender, _to, _amount);
     }
@@ -104,6 +111,7 @@ contract Property {
             if (_members[i] != address(0)) {
                 activeMember[_members[i]][_currMonth].isActive = true;
                 activeMember[_members[i]][_currMonth].feeAmount = _feeAmount;
+                activeMember[_members[i]][_currMonth].memberSince = block.timestamp;
             }
         }
         emit ADD_MEMBERS(_members, _currMonth, _feeAmount);

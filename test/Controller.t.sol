@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {DeployController} from "../script/DeployController.s.sol";
 import {Controller} from "../src/Controller.sol";
 
 contract ControllerTest is Test {
@@ -12,8 +11,7 @@ contract ControllerTest is Test {
     address prop = address(0x3);
 
     function setUp() public {
-        DeployController controllerScript = new DeployController();
-        controller = controllerScript.run(factory, supportedToken);
+        controller = new Controller(factory, supportedToken);
     }
 
     function testSupportedToken() public view {

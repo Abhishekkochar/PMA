@@ -11,6 +11,8 @@ contract DeployFactory is Script {
     string name = "Property One";
 
     function run() public returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("MANAGER_PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
         DPMAFactory factory = DPMAFactory(factoryAdd);
         vm.startBroadcast();
         address propertyAdd = factory.deployProperty(initBal, owner, name);
