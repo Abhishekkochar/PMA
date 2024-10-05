@@ -1,66 +1,11 @@
-## Foundry
+## Scroll testnet contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+### DPMA factory
+[0xeD7A35c4Ee06ea4e3203471d1b022019849F8EDA](https://sepolia.scrollscan.com/address/0xed7a35c4ee06ea4e3203471d1b022019849f8eda)
 
-Foundry consists of:
+### Controller
+[0x6aE07395E64A0bEd5529e170C1A0b667E05D4Ad3](https://sepolia.scrollscan.com/address/0x6ae07395e64a0bed5529e170c1a0b667e05d4ad3)
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### Mock ERC20
+[0x5920257792dbba08dfadd34607b781e3c2cdb3cf](https://sepolia.scrollscan.com/address/0x5920257792dbba08dfadd34607b781e3c2cdb3cf)
 
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```

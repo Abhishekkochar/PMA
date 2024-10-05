@@ -6,7 +6,8 @@ import {DPMAFactory} from "../src/DPMAFactory.sol";
 
 contract DeployFactory is Script {
     function run() public returns (DPMAFactory) {
-        vm.startBroadcast();
+        uint256 deployerPrivateKey = vm.envUint("MANAGER_PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
         DPMAFactory factory = new DPMAFactory();
         vm.stopBroadcast();
         console.log("DPMAFactory address: %s", address(factory));
