@@ -3,23 +3,24 @@ pragma solidity ^0.8.13;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-// Custom error
-error NOT_THE_FACTORY();
-
 contract Controller {
+    // Custom error
+    error NOT_THE_FACTORY();
+    error INVALID_ADDRESS();
+
     modifier onlyFactory() {
-        if (msg.sender != address(this)) revert NOT_THE_FACTORY();
+        if (msg.sender != factory) revert NOT_THE_FACTORY();
         _;
     }
-    // event
 
+    // event
     event PROPERTY_ADDED(address property);
     event PROPERTY_REMOVED(address property);
 
     // Property contract ==> bool
     mapping(address => bool) internal activeProperty;
     // factory
-    address immutable factory;
+    address public immutable factory;
     // Supported Token
     address internal supportedToken;
 
@@ -33,6 +34,7 @@ contract Controller {
      * @param _property property contract that has been added
      */
     function addPropertySet(address _property) external onlyFactory {
+        if (_property == address(0)) revert INVALID_ADDRESS();
         activeProperty[_property] = true;
         emit PROPERTY_ADDED(_property);
     }
