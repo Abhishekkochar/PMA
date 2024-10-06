@@ -6,6 +6,7 @@ import {DeployFactory} from "../script/DeployFactory.s.sol";
 import {DeployERC20} from "../script/DeployERC20.s.sol";
 import {DeployController} from "../script/DeployController.s.sol";
 import {DPMAFactory} from "../src/DPMAFactory.sol";
+import {Property} from "../src/Property.sol";
 import {Controller} from "../src/Controller.sol";
 import {StandardTokenMock} from "../src/Mock/StandardTokenMock.sol";
 import {IController} from "../src/interface/interfaces.sol";
@@ -16,16 +17,27 @@ contract FactoryTest is Test {
     Controller controller;
     address owner;
     address propOwner = address(0x1);
+    address userOne = address(0x2);
+    address userTwo = address(0x3);
+    address[] members = [userOne, userTwo];
 
     function setUp() public {
         // Deploying factory
         factory = new DPMAFactory();
         owner = factory.owner();
         // Deploying ERC20
-        standardTokenMock = new StandardTokenMock(address(factory), "Test Token", "TT");
-        // Deploying Controller
-        controller = new Controller(address(factory), address(standardTokenMock));
+        standardTokenMock = new StandardTokenMock(
+            address(factory),
+            "Test Token",
+            "TT"
+        );
         vm.startPrank(owner);
+        // Deploying Controller
+        controller = new Controller(
+            address(factory),
+            address(standardTokenMock)
+        );
+
         factory.addController(IController(address(controller)));
         vm.stopPrank();
     }
@@ -36,11 +48,38 @@ contract FactoryTest is Test {
         assertEq(address(controller), address(controllerAdd));
     }
 
-    function testDeployProperty() external returns (address) {
+    function testDeployProperty() external {
         vm.startPrank(owner);
-        address propAddress = factory.deployProperty(100 ** 18, propOwner, "Property One");
+        address propAddress = factory.deployProperty(
+            100 ** 18,
+            propOwner,
+            "Property One"
+        );
         vm.stopPrank();
-        return propAddress;
+
+        Property property = Property(propAddress);
+        vm.startPrank(propOwner);
+        uint256 fee = 10 ** 18;
+        uint8 currMonth = 9;
+        // Adding member here
+        property.addMembers(members, currMonth, fee);
+        vm.stopPrank();
+        // Checking member status
+        Property.FeeStatus memory status = property.getMemberStatus(
+            userOne,
+            currMonth
+        );
+        assertTrue(status.isActive);
+        assertFalse(status.isPaid);
+        // Pay the fee
+        vm.startPrank(userOne);
+        standardTokenMock.mint(userOne, 100 ** 18);
+        uint256 beforebal = standardTokenMock.balanceOf(userOne);
+        standardTokenMock.approve(propAddress, UINT256_MAX);
+        property.payFee(currMonth);
+        uint256 afterBal = standardTokenMock.balanceOf(userOne);
+        assertEq(beforebal - fee, afterBal);
+        vm.stopPrank();
     }
 
     function testWithdrawErc20() public {

@@ -18,7 +18,7 @@ error TRANSFER_FAILED();
 
 contract Property {
     modifier onlyOwner() {
-        if (msg.sender != address(this)) revert NOT_THE_OWNER();
+        if (msg.sender != owner) revert NOT_THE_OWNER();
         _;
     }
 
@@ -33,14 +33,14 @@ contract Property {
     event PAID_EXPENSES(address from, address to, uint256 amount);
 
     // Owner of the property
-    address internal owner;
+    address public owner;
     IController controller;
     // property name
     string name;
     uint256 public totaFeePaid;
     uint256 public totalExpenses;
 
-    struct feeStatus {
+    struct FeeStatus {
         bool isActive;
         bool isPaid;
         uint256 feeAmount;
@@ -50,9 +50,14 @@ contract Property {
 
     IERC20 supportedToken;
     // member => month => feeStatus
-    mapping(address => mapping(uint8 => feeStatus)) internal activeMember;
+    mapping(address => mapping(uint8 => FeeStatus)) internal activeMember;
 
-    constructor(address _owner, string memory _name, IERC20 _supportedToken, IController _controller) {
+    constructor(
+        address _owner,
+        string memory _name,
+        IERC20 _supportedToken,
+        IController _controller
+    ) {
         owner = _owner;
         name = _name;
         supportedToken = _supportedToken;
@@ -82,13 +87,16 @@ contract Property {
      * @param _to Address recieving supported token
      * @param _amount Amount paid `_to`
      */
-    function payExpenses(address _to, uint256 _amount) external onlyOwner isPropertyActive {
+    function payExpenses(
+        address _to,
+        uint256 _amount
+    ) external onlyOwner isPropertyActive {
         if (_to == address(0)) revert INVALID_ADDRESS();
         if (_amount == 0) revert INVALID_AMOUNT();
         uint256 beforeBalance = getBalance();
         if (beforeBalance < _amount) revert INSUFFICENT_BALANCE();
         totalExpenses = totalExpenses + _amount;
-        supportedToken.transferFrom(address(this), _to, _amount);
+        supportedToken.transfer(_to, _amount);
         emit PAID_EXPENSES(msg.sender, _to, _amount);
     }
 
@@ -98,11 +106,11 @@ contract Property {
      * @param _currMonth Current month such as 1 for Jan
      * @param _feeAmount Maintaince fee this member has to pay
      */
-    function addMembers(address[] calldata _members, uint8 _currMonth, uint256 _feeAmount)
-        external
-        onlyOwner
-        isPropertyActive
-    {
+    function addMembers(
+        address[] calldata _members,
+        uint8 _currMonth,
+        uint256 _feeAmount
+    ) external onlyOwner isPropertyActive {
         if (_members.length == 0) revert INVALID_MEMBERS();
         if (activeMember[msg.sender][_currMonth].isActive) {
             revert MEMBER_IS_ALREADY_ACTIVE();
@@ -111,7 +119,8 @@ contract Property {
             if (_members[i] != address(0)) {
                 activeMember[_members[i]][_currMonth].isActive = true;
                 activeMember[_members[i]][_currMonth].feeAmount = _feeAmount;
-                activeMember[_members[i]][_currMonth].memberSince = block.timestamp;
+                activeMember[_members[i]][_currMonth].memberSince = block
+                    .timestamp;
             }
         }
         emit ADD_MEMBERS(_members, _currMonth, _feeAmount);
@@ -125,7 +134,7 @@ contract Property {
     function withdrawERC20(address _erc20, uint256 _amount) external onlyOwner {
         if (_erc20 == address(0)) revert INVALID_ADDRESS();
         if (_amount == 0) revert INVALID_AMOUNT();
-        bool success = IERC20(_erc20).transferFrom(address(this), owner, _amount);
+        bool success = IERC20(_erc20).transfer(owner, _amount);
         if (success == false) revert TRANSFER_FAILED();
     }
 
@@ -136,5 +145,12 @@ contract Property {
     // Get current balance of this contract
     function getBalance() public view returns (uint256) {
         return supportedToken.balanceOf(address(this));
+    }
+
+    function getMemberStatus(
+        address user,
+        uint8 month
+    ) external view returns (FeeStatus memory) {
+        return activeMember[user][month];
     }
 }
